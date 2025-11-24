@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 
 const Home = () => {
@@ -21,7 +21,11 @@ const Home = () => {
   ]);
   const [isMarketOpen, setIsMarketOpen] = useState(true);
   const [priceHistory, setPriceHistory] = useState({});
-  const [showMarketAnalysis, setShowMarketAnalysis] = useState(true);
+  const [showMarketAnalysis, setShowMarketAnalysis] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+
+  const marketSectionRef = useRef(null);
+  const marketButtonRef = useRef(null);
 
   // ----------------- REAL-TIME MARKET DATA -----------------
   useEffect(() => {
@@ -109,6 +113,46 @@ const Home = () => {
     };
   }, []);
 
+  // ----------------- HOVER HANDLERS -----------------
+  useEffect(() => {
+    const handleMouseEnter = () => {
+      setIsHovering(true);
+      setShowMarketAnalysis(true);
+    };
+
+    const handleMouseLeave = (e) => {
+      // Check if mouse is leaving to a non-related element
+      if (
+        marketSectionRef.current &&
+        !marketSectionRef.current.contains(e.relatedTarget) &&
+        marketButtonRef.current &&
+        !marketButtonRef.current.contains(e.relatedTarget)
+      ) {
+        setIsHovering(false);
+        setShowMarketAnalysis(false);
+      }
+    };
+
+    const marketSection = marketSectionRef.current;
+    const marketButton = marketButtonRef.current;
+
+    if (marketSection && marketButton) {
+      marketSection.addEventListener('mouseenter', handleMouseEnter);
+      marketSection.addEventListener('mouseleave', handleMouseLeave);
+      marketButton.addEventListener('mouseenter', handleMouseEnter);
+      marketButton.addEventListener('mouseleave', handleMouseLeave);
+    }
+
+    return () => {
+      if (marketSection && marketButton) {
+        marketSection.removeEventListener('mouseenter', handleMouseEnter);
+        marketSection.removeEventListener('mouseleave', handleMouseLeave);
+        marketButton.removeEventListener('mouseenter', handleMouseEnter);
+        marketButton.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, []);
+
   // ----------------- SCROLL PROGRESS -----------------
   useEffect(() => {
     const handleScroll = () => {
@@ -162,6 +206,13 @@ const Home = () => {
     const min = Math.min(...data);
     const range = max - min;
     
+    // Generate proper SVG path data
+    const pathData = data.map((value, index) => {
+      const x = (index / (data.length - 1)) * 60;
+      const y = range > 0 ? 20 - ((value - min) / range) * 20 : 10;
+      return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+    }).join(' ');
+
     return (
       <svg width="60" height="20" className="ml-2">
         {data.map((value, index) => {
@@ -178,11 +229,7 @@ const Home = () => {
           );
         })}
         <path
-          d={`M ${data.map((value, index) => {
-            const x = (index / (data.length - 1)) * 60;
-            const y = range > 0 ? 20 - ((value - min) / range) * 20 : 10;
-            return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-          }).join(' ')}`}
+          d={pathData}
           stroke={isPositive ? "#10B981" : "#EF4444"}
           strokeWidth="1.5"
           fill="none"
@@ -277,30 +324,49 @@ const Home = () => {
     <div className="min-h-screen bg-white text-gray-900">
       <ScrollProgressBar />
 
-      {/* LIVE MARKET ANALYSIS SECTION */}
+      {/* LIVE MARKET BUTTON - Fixed at Top Right */}
+      <div className="fixed top-24 right-4 z-50">
+        <button
+          ref={marketButtonRef}
+          className="  text-cyan-500   hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 group"
+          onMouseEnter={() => {
+            setIsHovering(true);
+            setShowMarketAnalysis(true);
+          }}
+        >
+          <span className="font-semibold text-xs whitespace-nowrap">Live Market</span>
+          <div className={`w-2 h-2 rounded-full ${isMarketOpen ? 'bg-green-400' : 'bg-red-400'} animate-pulse`}></div>
+        </button>
+      </div>
+      
+    {/* LIVE MARKET ANALYSIS SECTION - Now appears below the hero section */}
       {showMarketAnalysis && (
-        <section className="bg-gradient-to-r from-gray-900 to-blue-900 text-white py-4 border-b-4 border-cyan-500 shadow-2xl relative">
-          {/* Toggle Button - Positioned at top-right corner of market section */}
-          <button
-            onClick={() => setShowMarketAnalysis(false)}
-            className="absolute top-3 right-4 z-10 bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 transform hover:scale-110 shadow-lg"
-            title="Hide Market Data"
-          >
-            ×
-          </button>
-
+        <section 
+          ref={marketSectionRef}
+          className="w-full bg-gradient-to-r from-gray-900 to-blue-900 text-white py-3 border-b-4 border-cyan-500 shadow-lg z-40"
+          onMouseEnter={() => {
+            setIsHovering(true);
+            setShowMarketAnalysis(true);
+          }}
+          onMouseLeave={(e) => {
+            if (!marketButtonRef.current?.contains(e.relatedTarget)) {
+              setIsHovering(false);
+              setShowMarketAnalysis(false);
+            }
+          }}
+        >
           <div className="container mx-auto px-4">
             <div className="max-w-7xl mx-auto">
               {/* Market Status Bar */}
-              <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
-                <div className="flex items-center space-x-4 mb-3 sm:mb-0">
+              <div className="flex flex-col sm:flex-row items-center justify-between mb-3">
+                <div className="flex items-center space-x-3 mb-2 sm:mb-0">
                   <div className={`flex items-center ${isMarketOpen ? 'text-green-400' : 'text-red-400'}`}>
-                    <div className={`w-3 h-3 rounded-full ${isMarketOpen ? 'bg-green-400' : 'bg-red-400'} mr-2 animate-pulse`} />
-                    <span className="text-sm font-bold">
-                      {isMarketOpen ? ' LIVE MARKET' : ' MARKET CLOSED'}
+                    <div className={`w-2 h-2 rounded-full ${isMarketOpen ? 'bg-green-400' : 'bg-red-400'} mr-1 animate-pulse`} />
+                    <span className="text-xs font-medium">
+                      {isMarketOpen ? 'LIVE' : 'CLOSED'}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-300 bg-black/30 px-2 py-1 rounded">
+                  <div className="text-xs text-gray-300">
                     {new Date().toLocaleDateString('en-IN', { 
                       weekday: 'short', 
                       year: 'numeric', 
@@ -310,15 +376,17 @@ const Home = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-3 text-sm text-gray-300">
-                  <span className="bg-blue-600 px-2 py-1 rounded">NSE</span>
-                  <span className="bg-green-600 px-2 py-1 rounded">BSE</span>
-                  <span className="bg-purple-600 px-2 py-1 rounded">MCX</span>
+                <div className="flex items-center space-x-2 text-xs text-gray-300">
+                  <span>NSE</span>
+                  <span>•</span>
+                  <span>BSE</span>
+                  <span>•</span>
+                  <span>MCX</span>
                 </div>
               </div>
 
               {/* Main Indices */}
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 mb-3">
                 {[
                   { name: "NIFTY 50", data: marketData.nifty, key: "nifty" },
                   { name: "SENSEX", data: marketData.sensex, key: "sensex" },
@@ -327,10 +395,10 @@ const Home = () => {
                 ].map((index, idx) => (
                   <div 
                     key={idx} 
-                    className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 hover:from-gray-700 hover:to-gray-600 transition-all duration-300 hover:scale-105 cursor-pointer group border border-gray-600 shadow-lg"
+                    className="bg-gray-800 rounded-lg p-3 hover:bg-gray-700 transition-all duration-300 hover:scale-105 cursor-pointer group"
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="text-xs font-semibold text-gray-300">{index.name}</div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="text-xs text-gray-400 font-medium">{index.name}</div>
                       <div className="flex items-center">
                         <MarketIndicator isPositive={index.data.change >= 0} />
                         <MiniSparkline 
@@ -340,10 +408,10 @@ const Home = () => {
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
-                      <div className="text-xl font-bold transition-all duration-300">
+                      <div className="text-base font-bold transition-all duration-300">
                         {index.data.price.toFixed(0)}
                       </div>
-                      <div className={`text-sm font-bold transition-all duration-300 ${index.data.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className={`text-xs font-semibold transition-all duration-300 ${index.data.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {index.data.change >= 0 ? '+' : ''}{index.data.change.toFixed(2)} 
                         <span className="ml-1">({index.data.percent >= 0 ? '+' : ''}{index.data.percent.toFixed(2)}%)</span>
                       </div>
@@ -353,19 +421,19 @@ const Home = () => {
               </div>
 
               {/* Active Stocks Ticker */}
-              <div className="relative overflow-hidden bg-gray-800 rounded-xl p-3 border border-gray-700">
+              <div className="relative overflow-hidden bg-gray-800 rounded-lg p-2">
                 <div className="flex animate-marquee whitespace-nowrap">
                   {[...activeStocks, ...activeStocks].map((stock, idx) => (
                     <div 
                       key={idx} 
-                      className="flex items-center space-x-6 px-8 py-3 hover:bg-gray-700 rounded-lg transition-all duration-300 cursor-pointer group mx-4"
+                      className="flex items-center space-x-4 px-6 py-2 hover:bg-gray-700 rounded transition-colors duration-200 cursor-pointer group"
                     >
-                      <div className="text-sm font-bold min-w-[120px] text-cyan-300">{stock.symbol}</div>
-                      <div className="text-sm font-mono min-w-[90px] transition-all duration-300 font-bold">
-                        ₹{stock.price.toFixed(2)}
+                      <div className="text-xs font-medium min-w-[80px]">{stock.symbol}</div>
+                      <div className="text-xs font-mono min-w-[70px] transition-all duration-300">
+                        {stock.price.toFixed(2)}
                       </div>
                       <div className="flex items-center">
-                        <div className={`text-sm font-bold transition-all duration-300 ${stock.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-xs font-semibold transition-all duration-300 ${stock.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)} 
                           <span className="ml-1">({stock.percent >= 0 ? '+' : ''}{stock.percent.toFixed(2)}%)</span>
                         </div>
@@ -380,111 +448,79 @@ const Home = () => {
               </div>
             </div>
           </div>
-
-          <style jsx>{`
-            @keyframes marquee {
-              0% { transform: translateX(0); }
-              100% { transform: translateX(-50%); }
-            }
-            .animate-marquee {
-              animation: marquee 40s linear infinite;
-            }
-            @media (max-width: 768px) {
-              .animate-marquee {
-                animation: marquee 60s linear infinite;
-              }
-            }
-          `}</style>
         </section>
       )}
 
-      {/* Show Market Button - Only visible when market is hidden */}
-      {!showMarketAnalysis && (
-        <div className="bg-gradient-to-r from-gray-900 to-blue-900 text-white py-2 border-b-4 border-cyan-500 shadow-lg">
-          <div className="container mx-auto px-4">
-            <div className="max-w-7xl mx-auto flex justify-end">
-              <button
-                onClick={() => setShowMarketAnalysis(true)}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2"
-              >
-                <span>📈</span>
-                <span>Show Live Market</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* HERO SECTION */}
+      {/* HERO SECTION - This is your header section */}
       <section className="relative bg-gradient-to-br from-blue-50 via-white to-cyan-50 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center py-14 md:py-20">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 md:py-16">
               {/* Text Side */}
               <div className="text-gray-800">
-                <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-xs sm:text-sm font-bold mb-6 sm:mb-8 animate-pulse shadow-lg">
+                <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-xs font-medium mb-4 sm:mb-6 animate-pulse">
                   🏆 Trusted Share Broking Partner
                 </div>
 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 md:mb-6 leading-tight">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-5 leading-tight">
                   Invest with Knowledge,
                   <span className="block text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text animate-gradient">
                     Strategy & Support
                   </span>
                 </h1>
 
-                <p className="text-lg md:text-xl text-gray-600 mb-6 md:mb-8 leading-relaxed">
+                <p className="text-base md:text-lg text-gray-600 mb-5 md:mb-6 leading-relaxed">
                   At Anand Share Broking, we bring expertise, technology, and trust together 
                   to create a seamless trading experience for every investor.
                 </p>
 
                 {/* Key Benefits */}
-                <div className="grid grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8 text-sm">
-                  <div className="flex items-center space-x-3 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xl shadow-md">
+                <div className="grid grid-cols-2 gap-3 md:gap-4 mb-5 md:mb-6 text-xs">
+                  <div className="flex items-center space-x-2 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-lg">
                       ✓
                     </div>
-                    <span className="text-gray-700 font-semibold">
+                    <span className="text-gray-700 font-medium">
                       Expert Guidance
                     </span>
                   </div>
-                  <div className="flex items-center space-x-3 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xl shadow-md">
+                  <div className="flex items-center space-x-2 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-lg">
                       ✓
                     </div>
-                    <span className="text-gray-700 font-semibold">
+                    <span className="text-gray-700 font-medium">
                       Advanced Tools
                     </span>
                   </div>
-                  <div className="flex items-center space-x-3 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
-                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 text-xl shadow-md">
+                  <div className="flex items-center space-x-2 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 text-lg">
                       ✓
                     </div>
-                    <span className="text-gray-700 font-semibold">
+                    <span className="text-gray-700 font-medium">
                       Secure Trading
                     </span>
                   </div>
-                  <div className="flex items-center space-x-3 animate-fade-in-up" style={{animationDelay: '0.4s'}}>
-                    <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center text-cyan-600 text-xl shadow-md">
+                  <div className="flex items-center space-x-2 animate-fade-in-up" style={{animationDelay: '0.4s'}}>
+                    <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center text-cyan-600 text-lg">
                       ✓
                     </div>
-                    <span className="text-gray-700 font-semibold">
+                    <span className="text-gray-700 font-medium">
                       Personal Support
                     </span>
                   </div>
                 </div>
 
                 {/* CTAs */}
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <Link
                     to="/open-account"
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl text-center"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg text-center"
                   >
                     Start Investing
                   </Link>
                   <Link
                     to="/demo"
-                    className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 text-center transform hover:scale-105"
+                    className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-6 py-3 rounded-lg font-semibold text-base transition-all duration-300 text-center"
                   >
                     Learn More
                   </Link>
@@ -493,31 +529,31 @@ const Home = () => {
 
               {/* Real-time Trading Platform Preview */}
               <div className="relative">
-                <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-w-md ml-auto mr-auto lg:mr-0 transform hover:scale-105 transition-transform duration-500">
-                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden max-w-md ml-auto mr-auto lg:mr-0 transform hover:scale-105 transition-transform duration-500">
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="text-white font-bold text-base">
+                      <div className="flex items-center space-x-2">
+                        <div className="text-white font-semibold text-sm">
                           Live Trading Platform
                         </div>
-                        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                       </div>
-                      <div className="text-white/90 text-sm font-semibold">
+                      <div className="text-white/80 text-xs">
                         {isMarketOpen ? 'Live Markets' : 'Market Closed'}
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-6 space-y-6">
+                  <div className="p-5 space-y-4">
                     {/* Real-time Graph */}
-                    <div className="bg-gray-50 rounded-xl p-4 border">
-                      <div className="flex justify-between items-center mb-3">
-                        <div className="text-sm font-bold text-gray-800">NIFTY 50</div>
-                        <div className={`text-sm font-bold ${marketData.nifty.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="text-sm font-semibold text-gray-800">NIFTY 50</div>
+                        <div className={`text-xs font-semibold ${marketData.nifty.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {marketData.nifty.change >= 0 ? '+' : ''}{marketData.nifty.change.toFixed(2)} ({marketData.nifty.percent.toFixed(2)}%)
                         </div>
                       </div>
-                      <div className="h-32 bg-white rounded border">
+                      <div className="h-24 bg-white rounded border">
                         <svg viewBox="0 0 300 120" className="w-full h-full">
                           <path
                             d="M0,60 L50,55 L100,65 L150,45 L200,70 L250,50 L300,75"
@@ -545,39 +581,39 @@ const Home = () => {
                     </div>
 
                     {/* Portfolio Summary */}
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl hover:scale-105 transition-transform duration-300 border border-blue-100">
-                        <div className="text-green-600 text-lg font-bold">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-green-600 text-sm font-bold">
                           +₹8,456
                         </div>
-                        <div className="text-gray-600 text-xs font-semibold">
+                        <div className="text-gray-600 text-xs">
                           Today's Return
                         </div>
                       </div>
-                      <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl hover:scale-105 transition-transform duration-300 border border-purple-100">
-                        <div className="text-gray-800 text-lg font-bold">
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-gray-800 text-sm font-bold">
                           ₹1.87L
                         </div>
-                        <div className="text-gray-600 text-xs font-semibold">
+                        <div className="text-gray-600 text-xs">
                           Portfolio Value
                         </div>
                       </div>
-                      <div className="text-center p-4 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl hover:scale-105 transition-transform duration-300 border border-cyan-100">
-                        <div className="text-green-600 text-lg font-bold">
+                      <div className="text-center p-3 bg-cyan-50 rounded-lg">
+                        <div className="text-green-600 text-sm font-bold">
                           +12.3%
                         </div>
-                        <div className="text-gray-600 text-xs font-semibold">
+                        <div className="text-gray-600 text-xs">
                           YTD Return
                         </div>
                       </div>
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-3 rounded-xl font-bold text-sm transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <div className="grid grid-cols-2 gap-3">
+                      <button className="bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold text-xs transition-all duration-300">
                         INVEST
                       </button>
-                      <button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white py-3 rounded-xl font-bold text-sm transition-all duration-300 transform hover:scale-105 shadow-lg">
+                      <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold text-xs transition-all duration-300">
                         RESEARCH
                       </button>
                     </div>
@@ -589,299 +625,301 @@ const Home = () => {
         </div>
       </section>
 
-      {/* MISSION STATEMENT */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-black text-gray-800 mb-8">
-              Your Financial Growth is Our Shared Mission
-            </h2>
-            <div className="text-lg md:text-xl text-gray-600 leading-relaxed space-y-6">
-              <p>
-                In an ever-evolving financial market, we understand the importance of reliable 
-                guidance, transparent execution, and smart decision-making. That's why we offer 
-                a platform built for both beginners stepping into the market for the first time 
-                and seasoned investors aiming to refine and expand their portfolios.
-              </p>
-              <p>
-                Our approach is centered around empowering you with clarity and confidence. 
-                We help you understand market trends, identify growth opportunities, and build 
-                strategies that align with your long-term financial goals.
-              </p>
-              <p className="text-xl md:text-2xl font-bold text-blue-600">
-                With Anand Share Broking, you don't just trade — you invest with knowledge, 
-                strategy, and complete support.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* OUR VALUES */}
-      <section className="py-16 bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-black text-gray-800 mb-4">
-                Our Core Values
+      {/* REST OF THE CONTENT SECTIONS */}
+      <div>
+        {/* MISSION STATEMENT */}
+        <section className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
+                Your Financial Growth is Our Shared Mission
               </h2>
-              <p className="text-xl text-gray-600">
-                Building trust through expertise and technology
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {values.map((value, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-center border border-gray-100"
-                >
-                  <div className="text-5xl mb-6 transform hover:scale-110 transition-transform duration-300">
-                    {value.icon}
-                  </div>
-                  <h3 className="text-2xl font-black text-gray-800 mb-4">
-                    {value.title}
-                  </h3>
-                  <p className="text-gray-600 text-lg leading-relaxed">
-                    {value.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* COMPREHENSIVE SERVICES */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-black text-gray-800 mb-4">
-                Comprehensive Share Broking Services
-              </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Everything you need to succeed in your investment journey
-              </p>
-            </div>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {services.map((service, index) => (
-                <div
-                  key={index}
-                  className="service-card group bg-white border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 transform opacity-0 translate-y-8"
-                >
-                  <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-2xl mb-5 transform group-hover:scale-110 transition-transform duration-500 shadow-lg">
-                    {service.icon}
-                  </div>
-                  <h3 className="text-xl font-black text-gray-800 mb-3">
-                    {service.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4 leading-relaxed">
-                    {service.description}
-                  </p>
-                  <ul className="space-y-3">
-                    {service.features.map((feature, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center text-gray-700 transform translate-x-4 group-hover:translate-x-0 transition-transform duration-300"
-                        style={{transitionDelay: `${i * 100}ms`}}
-                      >
-                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 transform group-hover:scale-150 transition-transform duration-300"></span>
-                        <span className="font-medium">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SUCCESS STATISTICS */}
-      <section className="py-16 bg-gradient-to-r from-blue-50 to-purple-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {successStats.map((stat, index) => (
-                <div 
-                  key={index} 
-                  className="text-center transform hover:scale-105 transition-transform duration-300"
-                >
-                  <div className="text-3xl font-black text-gray-800 mb-2">
-                    {stat.number}
-                  </div>
-                  <div className="text-blue-600 font-bold text-lg mb-1">
-                    {stat.label}
-                  </div>
-                  <div className="text-gray-600 text-sm">
-                    {stat.description}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* WHY CHOOSE US */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-black text-gray-800 mb-6">
-                  Why Choose Anand Share Broking?
-                </h2>
-                <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                  We empower both beginners and experienced investors with the tools, 
-                  knowledge, and support needed to navigate financial markets confidently.
+              <div className="text-base md:text-lg text-gray-600 leading-relaxed space-y-4">
+                <p>
+                  In an ever-evolving financial market, we understand the importance of reliable 
+                  guidance, transparent execution, and smart decision-making. That's why we offer 
+                  a platform built for both beginners stepping into the market for the first time 
+                  and seasoned investors aiming to refine and expand their portfolios.
                 </p>
+                <p>
+                  Our approach is centered around empowering you with clarity and confidence. 
+                  We help you understand market trends, identify growth opportunities, and build 
+                  strategies that align with your long-term financial goals.
+                </p>
+                <p className="text-lg md:text-xl font-semibold text-blue-600">
+                  With Anand Share Broking, you don't just trade — you invest with knowledge, 
+                  strategy, and complete support.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                <div className="space-y-6">
-                  {[
-                    {
-                      icon: "🎓",
-                      title: "Beginner-Friendly",
-                      description: "Step-by-step guidance for new investors entering the market"
-                    },
-                    {
-                      icon: "⚡",
-                      title: "Advanced Platforms",
-                      description: "Professional tools for experienced traders to maximize returns"
-                    },
-                    {
-                      icon: "🛡️",
-                      title: "Complete Security",
-                      description: "Bank-grade security with transparent operations"
-                    },
-                    {
-                      icon: "📚",
-                      title: "Continuous Learning",
-                      description: "Regular market insights and educational resources"
-                    }
-                  ].map((feature, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start space-x-4 transform hover:translate-x-2 transition-transform duration-300"
-                    >
-                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 text-xl transform hover:scale-110 transition-transform duration-300">
-                        {feature.icon}
-                      </div>
-                      <div>
-                        <h4 className="font-black text-gray-800 text-lg mb-1">
-                          {feature.title}
-                        </h4>
-                        <p className="text-gray-600">
-                          {feature.description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        {/* OUR VALUES */}
+        <section className="py-12 bg-gradient-to-br from-gray-50 to-blue-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
+                  Our Core Values
+                </h2>
+                <p className="text-lg text-gray-600">
+                  Building trust through expertise and technology
+                </p>
               </div>
 
-              {/* Real-time Market Graph */}
-              <div className="relative">
-                <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl overflow-hidden shadow-2xl p-6">
-                  <div className="text-white mb-4">
-                    <h3 className="text-2xl font-black mb-2">Live Market Performance</h3>
-                    <p className="text-blue-100">Real-time index tracking</p>
+              <div className="grid md:grid-cols-3 gap-6">
+                {values.map((value, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1 text-center"
+                  >
+                    <div className="text-4xl mb-4 transform hover:scale-110 transition-transform duration-300">
+                      {value.icon}
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-3">
+                      {value.title}
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      {value.description}
+                    </p>
                   </div>
-                  <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      {Object.entries(marketData).map(([key, data], index) => (
-                        <div key={key} className="text-white text-center p-3 bg-white/5 rounded-lg">
-                          <div className="text-sm font-bold">{key.toUpperCase()}</div>
-                          <div className="text-lg font-black">{data.price.toFixed(0)}</div>
-                          <div className={`text-xs font-semibold ${data.change >= 0 ? 'text-green-300' : 'text-red-300'}`}>
-                            {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}
-                          </div>
-                        </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* COMPREHENSIVE SERVICES */}
+        <section className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
+                  Comprehensive Share Broking Services
+                </h2>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                  Everything you need to succeed in your investment journey
+                </p>
+              </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {services.map((service, index) => (
+                  <div
+                    key={index}
+                    className="service-card group bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-lg transition-all duration-500 transform opacity-0 translate-y-8"
+                  >
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white text-xl mb-4 transform group-hover:scale-110 transition-transform duration-500">
+                      {service.icon}
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">
+                      {service.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-3 leading-relaxed">
+                      {service.description}
+                    </p>
+                    <ul className="space-y-2">
+                      {service.features.map((feature, i) => (
+                        <li
+                          key={i}
+                          className="flex items-center text-sm text-gray-700 transform translate-x-4 group-hover:translate-x-0 transition-transform duration-300"
+                          style={{transitionDelay: `${i * 100}ms`}}
+                        >
+                          <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 transform group-hover:scale-150 transition-transform duration-300"></span>
+                          {feature}
+                        </li>
                       ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SUCCESS STATISTICS */}
+        <section className="py-12 bg-gradient-to-r from-blue-50 to-purple-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {successStats.map((stat, index) => (
+                  <div 
+                    key={index} 
+                    className="text-center transform hover:scale-105 transition-transform duration-300"
+                  >
+                    <div className="text-2xl font-bold text-gray-800 mb-1">
+                      {stat.number}
                     </div>
-                    <div className="h-48 bg-white/5 rounded-lg p-2">
-                      <svg viewBox="0 0 400 160" className="w-full h-full">
-                        <path
-                          d="M0,80 C50,70 100,90 150,60 C200,30 250,100 300,40 C350,-20 400,120 400,80"
-                          stroke="#FFFFFF"
-                          strokeWidth="2"
-                          fill="none"
-                          className="animate-draw-line"
-                        />
-                        <path
-                          d="M0,80 C50,70 100,90 150,60 C200,30 250,100 300,40 C350,-20 400,120 400,80 L400,160 L0,160 Z"
-                          fill="url(#graphGradient)"
-                          opacity="0.3"
-                        />
-                        <defs>
-                          <linearGradient id="graphGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8" />
-                            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.1" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
+                    <div className="text-blue-600 font-semibold text-sm mb-1">
+                      {stat.label}
+                    </div>
+                    <div className="text-gray-600 text-xs">
+                      {stat.description}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* WHY CHOOSE US */}
+        <section className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid lg:grid-cols-2 gap-8 items-center">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
+                    Why Choose Anand Share Broking?
+                  </h2>
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    We empower both beginners and experienced investors with the tools, 
+                    knowledge, and support needed to navigate financial markets confidently.
+                  </p>
+
+                  <div className="space-y-4">
+                    {[
+                      {
+                        icon: "🎓",
+                        title: "Beginner-Friendly",
+                        description: "Step-by-step guidance for new investors entering the market"
+                      },
+                      {
+                        icon: "⚡",
+                        title: "Advanced Platforms",
+                        description: "Professional tools for experienced traders to maximize returns"
+                      },
+                      {
+                        icon: "🛡️",
+                        title: "Complete Security",
+                        description: "Bank-grade security with transparent operations"
+                      },
+                      {
+                        icon: "📚",
+                        title: "Continuous Learning",
+                        description: "Regular market insights and educational resources"
+                      }
+                    ].map((feature, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start space-x-3 transform hover:translate-x-2 transition-transform duration-300"
+                      >
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-lg transform hover:scale-110 transition-transform duration-300">
+                          {feature.icon}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-800 text-sm mb-1">
+                            {feature.title}
+                          </h4>
+                          <p className="text-gray-600 text-sm">
+                            {feature.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Real-time Market Graph */}
+                <div className="relative">
+                  <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl overflow-hidden shadow-lg p-5">
+                    <div className="text-white mb-3">
+                      <h3 className="text-xl font-bold mb-1">Live Market Performance</h3>
+                      <p className="text-blue-100 text-sm">Real-time index tracking</p>
+                    </div>
+                    <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        {Object.entries(marketData).map(([key, data], index) => (
+                          <div key={key} className="text-white text-center p-2 bg-white/5 rounded">
+                            <div className="text-xs font-semibold">{key.toUpperCase()}</div>
+                            <div className="text-base font-bold">{data.price.toFixed(0)}</div>
+                            <div className={`text-xs ${data.change >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                              {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="h-32 bg-white/5 rounded p-2">
+                        <svg viewBox="0 0 400 120" className="w-full h-full">
+                          <path
+                            d="M0,60 C50,50 100,70 150,40 C200,10 250,80 300,20 C350,-40 400,100 400,60"
+                            stroke="#FFFFFF"
+                            strokeWidth="2"
+                            fill="none"
+                            className="animate-draw-line"
+                          />
+                          <path
+                            d="M0,60 C50,50 100,70 150,40 C200,10 250,80 300,20 C350,-40 400,100 400,60 L400,120 L0,120 Z"
+                            fill="url(#graphGradient)"
+                            opacity="0.3"
+                          />
+                          <defs>
+                            <linearGradient id="graphGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8" />
+                              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.1" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* FINAL CTA */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-6">
-              Start Your Investment Journey Today
-            </h2>
-            <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-              Join thousands of successful investors who trust Anand Share Broking 
-              for their financial growth. Experience the perfect blend of expertise, 
-              technology, and personalized support.
-            </p>
+        {/* FINAL CTA */}
+        <section className="py-12 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
+                Start Your Investment Journey Today
+              </h2>
+              <p className="text-lg text-blue-100 mb-6 leading-relaxed">
+                Join thousands of successful investors who trust Anand Share Broking 
+                for their financial growth.
+              </p>
 
-            <div className="grid md:grid-cols-3 gap-6 mb-8 text-base">
-              <div className="text-center transform hover:scale-110 transition-transform duration-300">
-                <div className="text-2xl font-black mb-1">
-                  Zero
+              <div className="grid md:grid-cols-3 gap-4 mb-6 text-sm">
+                <div className="text-center transform hover:scale-110 transition-transform duration-300">
+                  <div className="text-xl font-bold mb-1">
+                    Zero
+                  </div>
+                  <div className="text-blue-200">Account Fees</div>
                 </div>
-                <div className="text-blue-200 font-semibold">Account Fees</div>
-              </div>
-              <div className="text-center transform hover:scale-110 transition-transform duration-300">
-                <div className="text-2xl font-black mb-1">
-                  Free
+                <div className="text-center transform hover:scale-110 transition-transform duration-300">
+                  <div className="text-xl font-bold mb-1">
+                    Free
+                  </div>
+                  <div className="text-blue-200">Research Tools</div>
                 </div>
-                <div className="text-blue-200 font-semibold">Research Tools</div>
-              </div>
-              <div className="text-center transform hover:scale-110 transition-transform duration-300">
-                <div className="text-2xl font-black mb-1">
-                  Expert
+                <div className="text-center transform hover:scale-110 transition-transform duration-300">
+                  <div className="text-xl font-bold mb-1">
+                    Expert
+                  </div>
+                  <div className="text-blue-200">Support</div>
                 </div>
-                <div className="text-blue-200 font-semibold">Support</div>
               </div>
-            </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/open-account"
-                className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-xl font-black text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl"
-              >
-                Open Your Account
-              </Link>
-              <Link
-                to="/contact"
-                className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-xl font-black text-lg transition-all duration-300 transform hover:scale-105"
-              >
-                Talk to Expert
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  to="/open-account"
+                  className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg"
+                >
+                  Open Your Account
+                </Link>
+                <Link
+                  to="/contact"
+                  className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-6 py-3 rounded-lg font-semibold text-base transition-all duration-300 transform hover:scale-105"
+                >
+                  Talk to Expert
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* Add custom animations */}
       <style jsx global>{`
@@ -905,6 +943,11 @@ const Home = () => {
         @keyframes drawLine {
           to { stroke-dashoffset: 0; }
         }
+
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
         
         .animate-fade-in-up {
           animation: fadeInUp 0.6s ease-out forwards;
@@ -923,6 +966,10 @@ const Home = () => {
           stroke-dashoffset: 1000;
           animation: drawLine 3s ease-in-out forwards;
         }
+
+        .animate-marquee {
+          animation: marquee 40s linear infinite;
+        }
         
         .service-card.animate-in {
           opacity: 1;
@@ -930,6 +977,12 @@ const Home = () => {
         }
         
         /* Responsive improvements */
+        @media (max-width: 768px) {
+          .animate-marquee {
+            animation: marquee 60s linear infinite;
+          }
+        }
+
         @media (max-width: 640px) {
           .container {
             padding-left: 1rem;

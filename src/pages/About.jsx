@@ -10,6 +10,13 @@ const About = () => {
   const isInView2 = useInView(ref2, { once: true, threshold: 0.3 });
   const isInView3 = useInView(ref3, { once: true, threshold: 0.3 });
 
+  // Trading data for charts
+  const marketData = {
+    nifty: [17500, 17800, 17650, 17900, 18100, 18300, 18500, 18700, 18900, 19100],
+    sensex: [58000, 59000, 58500, 59500, 60000, 60500, 61000, 61500, 62000, 62500],
+    volume: [45000, 52000, 48000, 55000, 60000, 58000, 62000, 65000, 63000, 67000]
+  };
+
   const tradingFeatures = [
     {
       icon: "⚡",
@@ -88,13 +95,121 @@ const About = () => {
     }
   ];
 
+  // Chart Components
+  const LineChart = ({ data, color, title, height = 120 }) => {
+    const max = Math.max(...data);
+    const min = Math.min(...data);
+    
+    return (
+      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 backdrop-blur-sm">
+        <div className="text-xs text-gray-400 mb-2">{title}</div>
+        <div className="relative" style={{ height: `${height}px` }}>
+          <svg width="100%" height="100%" className="overflow-visible">
+            {/* Grid Lines */}
+            {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => (
+              <line
+                key={i}
+                x1="0"
+                y1={ratio * height}
+                x2="100%"
+                y2={ratio * height}
+                stroke="rgba(255,255,255,0.1)"
+                strokeWidth="1"
+              />
+            ))}
+            
+            {/* Data Line */}
+            <path
+              d={`M 0 ${height - ((data[0] - min) / (max - min)) * height} ${data.map((point, i) => 
+                `L ${(i / (data.length - 1)) * 100}% ${height - ((point - min) / (max - min)) * height}`
+              ).join(' ')}`}
+              fill="none"
+              stroke={color}
+              strokeWidth="2"
+              className="animate-draw"
+            />
+            
+            {/* Data Points */}
+            {data.map((point, i) => (
+              <circle
+                key={i}
+                cx={`${(i / (data.length - 1)) * 100}%`}
+                cy={height - ((point - min) / (max - min)) * height}
+                r="3"
+                fill={color}
+                className="animate-pulse"
+              />
+            ))}
+          </svg>
+        </div>
+      </div>
+    );
+  };
+
+  const VolumeChart = ({ data, color }) => {
+    const max = Math.max(...data);
+    
+    return (
+      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 backdrop-blur-sm">
+        <div className="text-xs text-gray-400 mb-2">Trading Volume</div>
+        <div className="flex items-end justify-between h-24 gap-1">
+          {data.map((value, i) => (
+            <motion.div
+              key={i}
+              initial={{ height: 0 }}
+              animate={{ height: `${(value / max) * 80}%` }}
+              transition={{ duration: 1, delay: i * 0.1 }}
+              className="flex-1 bg-gradient-to-t from-cyan-500 to-blue-500 rounded-t hover:from-cyan-400 hover:to-blue-400 transition-all duration-300 cursor-pointer"
+              style={{ minHeight: '4px' }}
+              whileHover={{ scale: 1.1 }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const TradingMetrics = () => (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {[
+        { label: "NIFTY 50", value: "18,942.15", change: "+1.25%" },
+        { label: "SENSEX", value: "63,284.45", change: "+1.12%" },
+        { label: "BANK NIFTY", value: "44,218.30", change: "+1.45%" },
+        { label: "VOLUME", value: "2.4L Cr", change: "+8.3%" }
+      ].map((metric, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: index * 0.1 }}
+          className="bg-slate-800/60 rounded-lg p-3 border border-slate-700/50 backdrop-blur-sm"
+        >
+          <div className="text-xs text-gray-400">{metric.label}</div>
+          <div className="flex items-baseline justify-between">
+            <div className="text-white font-bold text-sm">{metric.value}</div>
+            <div className={`text-xs ${metric.change.includes('+') ? 'text-green-400' : 'text-red-400'}`}>
+              {metric.change}
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 overflow-x-hidden">
-      {/* Advanced Hero Section - Completely Fixed Background */}
+      {/* Advanced Hero Section with Trading Charts */}
       <section className="relative py-20 md:py-28 bg-slate-900 overflow-hidden">
-        {/* Clean Background Elements */}
+        {/* Animated Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900/50 to-purple-900">
-          {/* Single smooth gradient without hard stops */}
+          {/* Grid Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+              backgroundSize: '50px 50px'
+            }}></div>
+          </div>
         </div>
         
         {/* Animated Blobs */}
@@ -105,66 +220,111 @@ const About = () => {
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="max-w-6xl mx-auto text-center text-white"
-          >
-            {/* Main Title with Gradient */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="mb-8"
-            >
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 md:mb-6">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
-                  ANAND
-                </span>
-                <span className="block text-2xl sm:text-3xl md:text-4xl text-gray-200 mt-2 md:mt-4">
-                  SHARE BROKING
-                </span>
-              </h1>
-              
-              <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto rounded-full mb-4 md:mb-6"></div>
-              
-              <p className="text-xl sm:text-2xl md:text-3xl font-light text-gray-200 mb-4">
-                Redefining <span className="font-semibold text-cyan-300">Digital Trading</span> Experience
-              </p>
-            </motion.div>
+          <div className="max-w-7xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-8 items-center">
+              {/* Left: Content */}
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1 }}
+                className="text-white"
+              >
+                {/* Main Title */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                  className="mb-8"
+                >
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
+                      ANAND
+                    </span>
+                    <span className="block text-2xl sm:text-3xl text-gray-200 mt-2">
+                      SHARE BROKING
+                    </span>
+                  </h1>
+                  
+                  <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full mb-6"></div>
+                  
+                  <p className="text-xl sm:text-2xl font-light text-gray-200 mb-4">
+                    Real-time Trading. <span className="font-semibold text-cyan-300">Smart Investments.</span>
+                  </p>
+                  <p className="text-lg text-gray-300 mb-6">
+                    Advanced charts, lightning execution, and institutional-grade tools for every trader.
+                  </p>
+                </motion.div>
 
-            {/* Stats Bar */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-2xl mx-auto"
-            >
-              {marketStats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-cyan-300">{stat.number}</div>
-                  <div className="text-sm text-gray-300">{stat.label}</div>
-                  <div className="text-xs text-gray-400">{stat.suffix}</div>
+                {/* Trading Metrics */}
+                <TradingMetrics />
+
+                {/* CTA Buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.9 }}
+                  className="flex flex-col sm:flex-row gap-3 mt-8"
+                >
+                  <button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold text-base shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300">
+                    Start Trading Now
+                  </button>
+                  <button className="border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-slate-900 px-6 py-3 rounded-xl font-semibold text-base transition-all duration-300">
+                    Open Demat Account
+                  </button>
+                </motion.div>
+              </motion.div>
+
+              {/* Right: Trading Charts */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1, delay: 0.5 }}
+                className="space-y-4"
+              >
+                {/* NIFTY Chart */}
+                <LineChart 
+                  data={marketData.nifty} 
+                  color="#22d3ee" 
+                  title="NIFTY 50 - Live Chart"
+                  height={120}
+                />
+                
+                {/* SENSEX Chart */}
+                <LineChart 
+                  data={marketData.sensex} 
+                  color="#3b82f6" 
+                  title="SENSEX - Live Chart"
+                  height={100}
+                />
+                
+                {/* Volume Chart */}
+                <VolumeChart 
+                  data={marketData.volume}
+                  color="#06b6d4"
+                />
+
+                {/* Performance Stats */}
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: "Success Rate", value: "97.3%", trend: "up" },
+                    { label: "Avg. Speed", value: "0.8ms", trend: "down" },
+                    { label: "Uptime", value: "99.95%", trend: "stable" }
+                  ].map((stat, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+                      className="bg-slate-800/60 rounded-lg p-3 text-center border border-slate-700/50 backdrop-blur-sm"
+                    >
+                      <div className="text-cyan-400 font-bold text-sm">{stat.value}</div>
+                      <div className="text-xs text-gray-400 mt-1">{stat.label}</div>
+                    </motion.div>
+                  ))}
                 </div>
-              ))}
-            </motion.div>
-
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.9 }}
-              className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center mt-8 md:mt-12"
-            >
-              <button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl font-semibold text-base md:text-lg shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300">
-                Start Trading Now
-              </button>
-              <button className="border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-slate-900 px-6 md:px-8 py-3 md:py-4 rounded-xl font-semibold text-base md:text-lg transition-all duration-300">
-                Open Demat Account
-              </button>
-            </motion.div>
-          </motion.div>
+              </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -431,7 +591,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Achievements Timeline - Reversed Order */}
+      {/* Achievements Timeline */}
       <section className="py-12 md:py-20 bg-gradient-to-br from-blue-50 to-cyan-50">
         <div className="container mx-auto px-4">
           <motion.div
@@ -460,7 +620,7 @@ const About = () => {
                   viewport={{ once: true }}
                   className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-6 group"
                 >
-                  {/* Year Badge - Mobile First */}
+                  {/* Year Badge */}
                   <div className="flex-shrink-0 w-full md:w-20 h-16 md:h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg group-hover:scale-110 transition-transform duration-300 mx-auto md:mx-0" style={{ maxWidth: '80px' }}>
                     {achievement.year}
                   </div>
@@ -484,9 +644,6 @@ const About = () => {
                 </motion.div>
               ))}
             </div>
-
-            {/* Timeline Connector for Desktop */}
-            
           </div>
         </div>
       </section>

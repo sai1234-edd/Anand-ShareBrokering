@@ -143,16 +143,6 @@ const Services = () => {
       color: "from-rose-500 to-pink-500",
       popular: false
     },
-    {
-      id: 3,
-      title: "Learning Center",
-      description: "Comprehensive educational resources, webinars, and trading courses for all levels.",
-      features: ["Video Courses", "Live Webinars", "Trading Simulator", "Certification"],
-      pricing: "Free & Paid Courses",
-      icon: "🎓",
-      color: "from-amber-500 to-yellow-500",
-      popular: false
-    }
   ];
 
   const platformStats = [
@@ -413,52 +403,6 @@ const Services = () => {
               Zero account opening fees • 24/7 Support • Advanced Trading Tools
             </p>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Platform Comparison */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">
-              Platform <span className="text-blue-600">Comparison</span>
-            </h2>
-          </motion.div>
-
-          <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
-                <tr>
-                  <th className="p-6 text-left">Feature</th>
-                  <th className="p-6 text-center">Web Platform</th>
-                  <th className="p-6 text-center">Desktop</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ['Real-time Charts', '✓', '✓', '✓'],
-                  ['Advanced Order Types', '✓', '✓', '✓'],
-                  ['Portfolio Analysis', '✓', '✓', '✓'],
-                  ['Technical Indicators', '50+', '30+', '100+'],
-                  ['Algorithmic Trading', '✓', 'Limited', '✓'],
-                  ['API Access', '✓', '✗', '✓']
-                ].map(([feature, web, mobile, desktop], index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                    <td className="p-4 font-semibold text-gray-800">{feature}</td>
-                    <td className="p-4 text-center text-green-600 font-bold">{web}</td>
-                    <td className="p-4 text-center text-green-600 font-bold">{mobile}</td>
-                    <td className="p-4 text-center text-green-600 font-bold">{desktop}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </section>
     </div>

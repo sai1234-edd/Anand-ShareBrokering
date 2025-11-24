@@ -23,43 +23,38 @@ const Header = () => {
 
   const isActiveLink = (path) => location.pathname === path;
 
-  const handleGetStartedClick = () => {
-    // Add your get started logic here
-    console.log("Get Started clicked");
-    setIsMenuOpen(false);
-  };
-
   return (
     <header
-      className={`sticky top-0 z-40 transition-all duration-300 
-      bg-white border-b 
-      ${isScrolled ? "shadow-md border-gray-200" : "border-gray-100"}`}
+      className={`sticky top-0 z-40 transition-all duration-300 bg-white border-b ${
+        isScrolled ? "shadow-md border-gray-200" : "border-gray-100"
+      }`}
     >
       <div className="container mx-auto px-4">
-        {/* Row */}
         <div className="flex justify-between items-center py-3 md:py-4">
-          {/* Logo - Matching Realtyy Style */}
-          <Link to="/" className="flex items-center space-x-2 md:space-x-3 group">
-            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-orange-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300">
+          {/* Logo Section */}
+          <Link to="/" className="flex items-center space-x-2 md:space-x-3 group flex-1 min-w-0">
+            {/* Logo Image */}
+            <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-orange-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex-shrink-0">
               <img
-                src="./images/image.png" // Update with your logo path
+                src="./images/image.png"
                 alt="Anand Share Broking"
                 className="w-full h-full object-cover object-top"
               />
             </div>
 
-            <div className="flex flex-col items-start">
-              <div className="flex items-center space-x-2">
+            {/* Text Content */}
+            <div className="flex flex-col min-w-0 flex-1">
+              <div className="flex items-center space-x-1 md:space-x-2 min-w-0">
                 <img
-                  src="/images/Anandhgroup Logo.png" // Update with your logo path
+                  src="/images/Anandhgroup Logo.png"
                   alt="Anand Share Broking Logo"
-                  className="w-8 h-10 md:w-10 md:h-12 object-contain"
+                  className="w-6 h-7 md:w-8 md:h-10 object-contain flex-shrink-0"
                 />
-                <div className="flex flex-col items-start">
-                  <h1 className="text-lg md:text-xl font-bold text-blue-800">
+                <div className="flex flex-col min-w-0 flex-1">
+                  <h1 className="text-sm md:text-lg lg:text-xl font-bold text-blue-800 whitespace-nowrap overflow-hidden">
                     <span className="text-orange-500">ANAND </span>SHARE BROKING
                   </h1>
-                  <p className="text-xs text-gray-600 italic mt-1">
+                  <p className="text-xs text-gray-600 italic mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
                     "Dharmo Rakshati Rakshitah"
                   </p>
                 </div>
@@ -67,13 +62,13 @@ const Header = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation - Matching Realtyy Size */}
-          <nav className="hidden lg:flex items-center space-x-3">
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-4 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${
+                className={`px-3 xl:px-4 py-2 rounded-lg text-sm xl:text-base font-semibold transition-all duration-200 ${
                   isActiveLink(item.path)
                     ? "text-blue-700 bg-blue-100 border border-blue-200"
                     : "text-blue-800 hover:bg-blue-50 hover:text-blue-700"
@@ -82,20 +77,21 @@ const Header = () => {
                 {item.label}
               </Link>
             ))}
-
           </nav>
 
-          {/* Mobile menu button - Matching Realtyy Size */}
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 md:p-3 text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200"
+            className="lg:hidden p-2 text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 flex-shrink-0 ml-2"
+            aria-label="Toggle menu"
           >
             {isMenuOpen ? (
               <svg
-                className="w-6 h-6 md:w-7 md:h-7"
+                className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   strokeLinecap="round"
@@ -106,10 +102,11 @@ const Header = () => {
               </svg>
             ) : (
               <svg
-                className="w-6 h-6 md:w-7 md:h-7"
+                className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   strokeLinecap="round"
@@ -122,10 +119,10 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Mobile Menu - Matching Realtyy Alignment */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="lg:hidden border-t border-gray-200 pb-4">
-            <nav className="space-y-2 pt-3">
+            <nav className="space-y-1 pt-3">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
