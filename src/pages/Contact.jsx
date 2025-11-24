@@ -101,13 +101,6 @@ const Contact = () => {
       link: "/research",
       color: "from-green-500 to-emerald-500"
     },
-    {
-      title: "Trading Education",
-      description: "Learn trading strategies",
-      icon: "🎓",
-      link: "/education",
-      color: "from-orange-500 to-red-500"
-    },
   ];
 
   const faqs = [
