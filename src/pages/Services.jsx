@@ -378,68 +378,6 @@ const Services = () => {
         </div>
       </section>
 
-      {/* Advanced Features Showcase */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">
-              Why Choose <span className="text-blue-600">Anand Share Broking?</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {[
-              {
-                icon: "⚡",
-                title: "Lightning Fast",
-                description: "Trade execution in milliseconds with our advanced infrastructure"
-              },
-              {
-                icon: "🛡️",
-                title: "Secure Platform",
-                description: "Bank-level security with 256-bit encryption and 2FA"
-              },
-              {
-                icon: "📊",
-                title: "Advanced Tools",
-                description: "Professional charting, analytics, and research tools"
-              },
-              {
-                icon: "💰",
-                title: "Cost Effective",
-                description: "Competitive brokerage with transparent pricing"
-              }
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-                className="text-center p-6 group"
-              >
-                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-slate-900 to-blue-900 text-white">
         <div className="container mx-auto px-4 sm:px-6 text-center">
