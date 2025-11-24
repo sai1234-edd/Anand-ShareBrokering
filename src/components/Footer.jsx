@@ -219,7 +219,7 @@ const Footer = () => {
                   <div className="text-left">
                     <h2 className="text-2xl font-bold">
                       <span className="text-orange-400">ANAND</span> 
-                      <span className="text-white"> SHARE BROKERING</span>
+                      <span className="text-white"> SHARE BROKING</span>
                     </h2>
                     <p className="text-orange-200 text-sm italic">"Dharmo Rakshati Rakshitah"</p>
                   </div>

@@ -57,7 +57,7 @@ const Header = () => {
                 />
                 <div className="flex flex-col items-start">
                   <h1 className="text-lg md:text-xl font-bold text-blue-800">
-                    <span className="text-orange-500">ANAND </span>SHARE BROKERING
+                    <span className="text-orange-500">ANAND </span>SHARE BROKING
                   </h1>
                   <p className="text-xs text-gray-600 italic mt-1">
                     "Dharmo Rakshati Rakshitah"

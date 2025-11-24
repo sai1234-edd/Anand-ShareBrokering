@@ -45,16 +45,6 @@ const Services = () => {
       popular: true
     },
     {
-      id: 2,
-      title: "Mobile Trading App",
-      description: "Powerful mobile app with intuitive interface, biometric login, and instant trade execution.",
-      features: ["Biometric Authentication", "One-Tap Trading", "Live Alerts", "Mobile Analytics"],
-      pricing: "Free Mobile App",
-      icon: "📱",
-      color: "from-purple-500 to-pink-500",
-      popular: false
-    },
-    {
       id: 3,
       title: "Algorithmic Trading",
       description: "Automated trading strategies with backtesting, live execution, and performance analytics.",
@@ -130,16 +120,6 @@ const Services = () => {
       color: "from-violet-500 to-purple-500",
       popular: false
     },
-    {
-      id: 3,
-      title: "Currency Derivatives",
-      description: "Trade in currency futures and options with real-time forex data and analysis.",
-      features: ["Forex Data", "Cross Currency", "Hedging Tools", "Global Events"],
-      pricing: "₹20 per lot",
-      icon: "💱",
-      color: "from-emerald-500 to-green-500",
-      popular: false
-    }
   ];
 
   const advisoryServices = [
@@ -519,7 +499,6 @@ const Services = () => {
                 <tr>
                   <th className="p-6 text-left">Feature</th>
                   <th className="p-6 text-center">Web Platform</th>
-                  <th className="p-6 text-center">Mobile App</th>
                   <th className="p-6 text-center">Desktop</th>
                 </tr>
               </thead>
