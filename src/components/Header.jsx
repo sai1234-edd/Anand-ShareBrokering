@@ -140,15 +140,6 @@ const Header = () => {
                   {item.label}
                 </Link>
               ))}
-
-              {/* Mobile Get Started Button */}
-              <button
-                onClick={handleGetStartedClick}
-                className="w-full text-left px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white text-base font-semibold rounded-lg mt-2 hover:from-green-700 hover:to-green-800 transition-all duration-300 flex items-center space-x-2"
-              >
-                <span className="text-lg">📈</span>
-                <span>Open Trading Account</span>
-              </button>
             </nav>
           </div>
         )}
