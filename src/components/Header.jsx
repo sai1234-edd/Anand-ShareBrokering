@@ -83,14 +83,6 @@ const Header = () => {
               </Link>
             ))}
 
-            {/* Get Started Button - Matching Realtyy Style */}
-            <button
-              onClick={handleGetStartedClick}
-              className="px-6 py-3 rounded-lg text-base font-semibold bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
-            >
-              <span className="text-lg">📈</span>
-              <span>Open Trading Account</span>
-            </button>
           </nav>
 
           {/* Mobile menu button - Matching Realtyy Size */}

@@ -297,7 +297,7 @@ const Home = () => {
                   <div className={`flex items-center ${isMarketOpen ? 'text-green-400' : 'text-red-400'}`}>
                     <div className={`w-3 h-3 rounded-full ${isMarketOpen ? 'bg-green-400' : 'bg-red-400'} mr-2 animate-pulse`} />
                     <span className="text-sm font-bold">
-                      {isMarketOpen ? ' LIVE MARKET' : '🔴 MARKET CLOSED'}
+                      {isMarketOpen ? ' LIVE MARKET' : ' MARKET CLOSED'}
                     </span>
                   </div>
                   <div className="text-xs text-gray-300 bg-black/30 px-2 py-1 rounded">
@@ -318,7 +318,7 @@ const Home = () => {
               </div>
 
               {/* Main Indices */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
                 {[
                   { name: "NIFTY 50", data: marketData.nifty, key: "nifty" },
                   { name: "SENSEX", data: marketData.sensex, key: "sensex" },
