@@ -51,50 +51,6 @@ const TradingPlatforms = () => {
       }
     },
     {
-      id: 'mobile',
-      name: 'Mobile Trading App',
-      icon: '📱',
-      description: 'Powerful mobile trading on the go',
-      tagline: 'Trade from anywhere with our intuitive mobile app',
-      image: '/images/mobile-app.png',
-      features: [
-        {
-          title: 'Biometric Login',
-          description: 'Secure and fast access with fingerprint/face ID',
-          icon: '🔒',
-          details: ['Fingerprint Auth', 'Face Recognition', 'PIN Protection', 'Quick Login']
-        },
-        {
-          title: 'Live Market Watch',
-          description: 'Real-time quotes and market movements',
-          icon: '📊',
-          details: ['Real-time Quotes', 'Price Alerts', 'Market News', 'Watchlists']
-        },
-        {
-          title: 'One-Tap Trading',
-          description: 'Instant trade execution with single tap',
-          icon: '👆',
-          details: ['Quick Order', 'Modify Orders', 'Cancel Orders', 'Order History']
-        },
-        {
-          title: 'Mobile Analytics',
-          description: 'Advanced analytics on your mobile',
-          icon: '📈',
-          details: ['Portfolio View', 'P&L Calculator', 'Market Scanner', 'Research Reports']
-        }
-      ],
-      specs: {
-        compatibility: 'iOS & Android',
-        updates: 'Auto-update',
-        security: 'Biometric + 2FA',
-        support: 'In-app Support'
-      },
-      cta: {
-        text: 'Download App',
-        link: '/download/app'
-      }
-    },
-    {
       id: 'desktop',
       name: 'Desktop Application',
       icon: '💻',

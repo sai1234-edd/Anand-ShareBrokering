@@ -26,6 +26,20 @@ const Home = () => {
 
   const marketSectionRef = useRef(null);
   const marketButtonRef = useRef(null);
+  const heroSectionRef = useRef(null);
+
+  // ----------------- SCROLL PROGRESS -----------------
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = (scrollTop / docHeight) * 100;
+      setScrollProgress(scrollPercent);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // ----------------- REAL-TIME MARKET DATA -----------------
   useEffect(() => {
@@ -151,20 +165,6 @@ const Home = () => {
         marketButton.removeEventListener('mouseleave', handleMouseLeave);
       }
     };
-  }, []);
-
-  // ----------------- SCROLL PROGRESS -----------------
-  useEffect(() => {
-    const handleScroll = () => {
-      const winHeight = window.innerHeight;
-      const docHeight = document.documentElement.scrollHeight - winHeight;
-      const scrollTop = window.pageYOffset;
-      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      setScrollProgress(progress);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // ----------------- SERVICE ANIMATIONS -----------------
@@ -323,23 +323,21 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <ScrollProgressBar />
-
-      {/* LIVE MARKET BUTTON - Fixed at Top Right */}
-      <div className="fixed top-24 right-4 z-50">
-        <button
-          ref={marketButtonRef}
-          className="  text-cyan-500   hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 group"
-          onMouseEnter={() => {
-            setIsHovering(true);
-            setShowMarketAnalysis(true);
-          }}
-        >
-          <span className="font-semibold text-xs whitespace-nowrap">Live Market</span>
-          <div className={`w-2 h-2 rounded-full ${isMarketOpen ? 'bg-green-400' : 'bg-red-400'} animate-pulse`}></div>
-        </button>
-      </div>
-      
-    {/* LIVE MARKET ANALYSIS SECTION - Now appears below the hero section */}
+              {/* LIVE MARKET BUTTON - Now positioned absolutely within hero section */}
+        <div className="absolute mt-20 top-4 right-1 z-30">
+          <button
+            ref={marketButtonRef}
+            className="  text bg-orange-100 px-2 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 group"
+            onMouseEnter={() => {
+              setIsHovering(true);
+              setShowMarketAnalysis(true);
+            }}
+          >
+            <span className="font-semibold text-sm whitespace-nowrap">Live Market</span>
+            <div className={`w-2 h-2 rounded-full ${isMarketOpen ? 'bg-green-400' : 'bg-red-400'} animate-pulse`}></div>
+          </button>
+        </div>
+            {/* LIVE MARKET ANALYSIS SECTION - Now appears below the hero section */}
       {showMarketAnalysis && (
         <section 
           ref={marketSectionRef}
@@ -452,7 +450,8 @@ const Home = () => {
       )}
 
       {/* HERO SECTION - This is your header section */}
-      <section className="relative bg-gradient-to-br from-blue-50 via-white to-cyan-50 overflow-hidden">
+      <section ref={heroSectionRef} className="relative bg-gradient-to-br from-blue-50 via-white to-cyan-50 overflow-hidden">
+        
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 md:py-16">
@@ -513,13 +512,13 @@ const Home = () => {
                 {/* CTAs */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link
-                    to="/open-account"
+                    to="/contact"
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg text-center"
                   >
                     Start Investing
                   </Link>
                   <Link
-                    to="/demo"
+                    to="/contact"
                     className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-6 py-3 rounded-lg font-semibold text-base transition-all duration-300 text-center"
                   >
                     Learn More
@@ -624,6 +623,7 @@ const Home = () => {
           </div>
         </div>
       </section>
+
 
       {/* REST OF THE CONTENT SECTIONS */}
       <div>
@@ -904,7 +904,7 @@ const Home = () => {
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
-                  to="/open-account"
+                  to="/contact"
                   className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >
                   Open Your Account
@@ -981,12 +981,26 @@ const Home = () => {
           .animate-marquee {
             animation: marquee 60s linear infinite;
           }
+          
+          /* Mobile-specific button positioning */
+          .absolute.top-4.right-4 {
+            top: 1rem;
+            right: 1rem;
+          }
         }
 
         @media (max-width: 640px) {
           .container {
             padding-left: 1rem;
             padding-right: 1rem;
+          }
+          
+          /* Ensure button stays visible on mobile */
+          .absolute.top-4.right-4 {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 30;
           }
         }
         

@@ -271,12 +271,6 @@ const Footer = () => {
                     </Link>
                   ))}
                   {/* Open Account Link */}
-                  <Link
-                    to="/contact"
-                    className="block text-gray-300 py-1 text-sm hover:text-orange-400 transition-all duration-200"
-                  >
-                    Open Trading Account
-                  </Link>
                 </div>
               </div>
 

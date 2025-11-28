@@ -36,12 +36,6 @@ const About = () => {
       description: "Bank-level encryption and multi-layer security protocols",
       speed: "256-bit SSL Security"
     },
-    {
-      icon: "📱",
-      title: "Mobile Trading",
-      description: "Seamless trading experience across all devices",
-      speed: "Zero Lag Experience"
-    }
   ];
 
   const marketStats = [

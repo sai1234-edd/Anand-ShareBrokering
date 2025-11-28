@@ -278,69 +278,6 @@ const ResearchAndInsights = () => {
                 ))}
               </div>
             </motion.div>
-
-            {/* Watchlist */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-xl p-6"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-black text-slate-900">My Watchlist</h3>
-                <span className="text-blue-500 text-sm">{watchlist.length} stocks</span>
-              </div>
-              
-              {watchlist.length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="text-4xl mb-2">📊</div>
-                  <p className="text-gray-600 text-sm">Add stocks to your watchlist</p>
-                  <div className="mt-4 space-y-2">
-                    {watchlistStocks.map((stock) => (
-                      <button
-                        key={stock.symbol}
-                        onClick={() => addToWatchlist(stock)}
-                        className="w-full text-left p-2 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors"
-                      >
-                        <div className="flex justify-between items-center">
-                          <span className="font-semibold">{stock.symbol}</span>
-                          <span className={`text-sm ${
-                            stock.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {stock.change}
-                          </span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {watchlist.map((stock) => (
-                    <div key={stock.symbol} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <div className="font-semibold">{stock.symbol}</div>
-                        <div className="text-sm text-gray-600">{stock.sector}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-semibold">{stock.price}</div>
-                        <div className={`text-sm ${
-                          stock.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {stock.change}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => removeFromWatchlist(stock.symbol)}
-                        className="text-red-500 hover:text-red-700 ml-2"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
           </div>
 
           {/* Main Content */}
